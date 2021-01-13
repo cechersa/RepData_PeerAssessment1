@@ -44,9 +44,9 @@ Histogram of the total steps taken each day
 hist(sum_ac$total.steps, xlab="Number of steps taken daily",main="Histogram of total steps taken per day",col="lightgreen")
 ```
 
-Mean of the steps taken daily
+Mean and median of the steps taken daily
 ```{r}
-mean_ac <- data.frame(mean=with(activity, tapply(steps,date,mean,na.rm=TRUE)))
+mean_ac <- data.frame(mean=with(activity, tapply(steps,date,mean,na.rm=TRUE)), median=with(activity, tapply(steps,date,median,na.rm=TRUE)))
 mean_ac <- slice(mean_ac,-grep("NaN",mean_ac$mean))
 mean_ac
 ```
@@ -100,7 +100,7 @@ summary(activity)
 **Histogram of the total number of steps taken each day with the new filled-in data frame**
 ```{r}
 sum_ac <- data.frame(total.steps=with(activity, tapply(steps,date,sum,na.rm=TRUE)))
-hist(sum_ac$total.steps, xlab="Number of steps taken daily",main="Histogram of total steps taken per day",col="pink")
+hist(sum_ac$total.steps, xlab="Number of steps taken daily",main="New histogram of total steps taken per day",col="pink")
 ```
 
 Imputing the missing data using the mean of the five minutes intervals, does impact the results, particularly for the frecuency of 0-5000 steps per day with the value below the half of the original data, and the frecuency of 10000-15000 steps  that originally was around 25, being now of around 35.
@@ -113,7 +113,35 @@ ac
 
 ```{r}
 summary(mean_ac)
-summary(ac$mean)
+summary(ac)
 ```
-Imputing the missing data using the mean of the five minutes intervals, did not impact much the results for the mean of total steps taken daily, just the first quantile is slightly higher now and the third quantile, is slightly lower.
+Imputing the missing data using the mean of the five minutes intervals, did not impact much the results for the mean of total steps taken daily, just the first quantile is slightly higher now and the third quantile, is slightly lower. However, the median changed for the dates where the data was imputed and it remained 0 for the rest.
 
+### Are there differences in activity patterns between weekdays and weekends?
+
+Establish which day of the week each date was
+```{r}
+activity$weekdays <- weekdays(activity$date)
+activity$weekdays <- ifelse(activity$weekdays %in% c("Saturday","Sunday"),sub(pattern="(.*)",replacement="weekend",activity$weekdays),sub(pattern="(.*)",replacement="weekday",activity$weekdays)) %>% as.factor()
+str(activity$weekdays)
+```
+
+Construct the table of the 5-minute interval and the average number of steps taken, averaged across all weekday days or weekend days.
+```{r}
+interval_weekend <- subset(activity,subset=activity$weekdays == "weekend")
+interval_weekend <- data.frame(weekdays= "weekend",minute=unique(interval_weekend$interval),ave.steps=with(interval_weekend, tapply(steps,interval,mean,na.rm=TRUE)),row.names=1:length(unique(interval_weekend$interval)))
+
+interval_weekday <- subset(activity,subset=activity$weekdays == "weekday")
+interval_weekday <- data.frame(weekdays="weekday",minute=unique(interval_weekday$interval),ave.steps=with(interval_weekday, tapply(steps,interval,mean,na.rm=TRUE)),row.names=1:length(unique(interval_weekday$interval))) %>% rbind(.,interval_weekend)
+```
+
+Plot the resulting table
+
+```{r}
+qplot(minute,ave.steps,data=interval_weekday,
+      geom="line", 
+      main="Comparison average steps on 5-minute intervals - weekdays",
+      xlab="Minutes of the day",
+      ylab="Average total steps taken",
+      facets=weekdays~.)
+```
