@@ -1,25 +1,25 @@
 ---
-title: "Reproducible Research: Peer Assessment 1"
-output: 
-  html_document:
-    keep_md: true
+title: "PA1_template"
+author: "Cecihes"
+date: "12/1/2021"
+output: html_document
 ---
 
+Unzip and load the file
 
-## Loading and preprocessing the data
+```{r}
+unzip("activity.zip")
+activity <- read.csv("activity.csv")
+colnames(activity)
+```
+
+Transform the date into date format.
+
+```{r}
+activity$date <- as.Date(activity$date, format="%Y-%m-%d")
+class(activity$date)
+```
 
 
 
-## What is mean total number of steps taken per day?
 
-
-
-## What is the average daily activity pattern?
-
-
-
-## Imputing missing values
-
-
-
-## Are there differences in activity patterns between weekdays and weekends?
