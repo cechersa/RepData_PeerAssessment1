@@ -50,7 +50,7 @@ mean_ac <- data.frame(mean=with(activity, tapply(steps,date,mean,na.rm=TRUE)), m
 mean_ac <- slice(mean_ac,-grep("NaN",mean_ac$mean))
 mean_ac
 ```
-
+The median for all is 0 and the mean varies along the day.
 
 ### What is the average daily activity pattern?
 
@@ -78,7 +78,6 @@ sum(is.na(activity$steps))
 Find the dates in which there are NAs
 ```{r}
 date_na <- rownames(sum_ac)[grep("^0",sum_ac$total.steps)] %>% as.Date()
-date_na
 ```
 
 Fill the 5-minutes intervals of these dates with the mean for each interval
@@ -93,8 +92,6 @@ for(i in 1:length(date_na)){
       }
     }
 }
-
-summary(activity)
 ```
 
 **Histogram of the total number of steps taken each day with the new filled-in data frame**
@@ -108,7 +105,6 @@ Imputing the missing data using the mean of the five minutes intervals, does imp
 **Mean and median of steps taken every 5-minutes of each day, using the new filled-in data frame**
 ```{r}
 ac <- data.frame(mean=with(activity, tapply(steps,date,mean)), median=with(activity, tapply(steps,date,median)))
-ac
 ```
 
 ```{r}
