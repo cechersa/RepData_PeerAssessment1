@@ -11,15 +11,15 @@ colnames(activity)
 ```
 
 Check where the missing values are
-```{r, cache=TRUE}
+```{r}
 summary(activity$steps)
 ```
 
-```{r, cache=TRUE}
+```{r}
 summary(activity$interval)
 ```
 
-```{r, cache=TRUE}
+```{r}
 summary(activity$days)
 ```
 
@@ -33,12 +33,42 @@ class(activity$date)
 
 ### What is mean total number of steps taken per day?
 
+Load libraries to use
 ```{r}
-mean_ac <- data.frame(mean=with(activity, tapply(steps,date,mean,na.rm=TRUE)))
+library("ggplot2")
+library("dplyr")
 ```
 
+Total steps taken per day
 ```{r}
-library("dplyr")
-mean_ac <- slice(mean_ac, -grep("NaN",mean_ac$mean))
+sum_ac <- data.frame(total.steps=with(activity, tapply(steps,date,sum,na.rm=TRUE)))
+sum_ac
+```
+
+Histogram of the total steps taken each day
+
+```{r}
+hist(sum_ac$total.steps, xlab="Number of steps taken daily",main="Histogram of total steps taken per day",col="lightgreen")
+```
+
+Mean of the steps taken daily
+```{r}
+mean_ac <- data.frame(mean=with(activity, tapply(steps,date,mean,na.rm=TRUE)))
+mean_ac <- slice(mean_ac,-grep("NaN",mean_ac$mean))
 mean_ac
 ```
+
+
+### What is the average daily activity pattern?
+
+Average steps taken every 5-minutes of each day
+```{r}
+five_min_steps <- data.frame(minute=unique(activity$interval),ave.steps=with(activity, tapply(steps,interval,mean,na.rm=TRUE)),row.names=1:length(unique(activity$interval)))
+with(five_min_steps,plot(minute,ave.steps,type="l",main="Average steps taken every five minutes of each day",ylab="Number of steps",xlab="Minute of the day"))
+```
+
+
+```{r}
+max_interval <- grep(max(five_min_steps$ave.steps),five_min_steps$ave.steps)
+```
+The 5-minutes interval with the maximum averaged number of steps is the `r max_interval` interval of the day.
