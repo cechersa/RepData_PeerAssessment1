@@ -12,15 +12,7 @@ colnames(activity)
 
 Check where the missing values are
 ```{r}
-summary(activity$steps)
-```
-
-```{r}
-summary(activity$interval)
-```
-
-```{r}
-summary(activity$days)
+summary(activity)
 ```
 
 Transform the date into date format.
@@ -36,6 +28,7 @@ class(activity$date)
 Load libraries to use
 ```{r}
 library("ggplot2")
+library("magrittr")
 library("dplyr")
 ```
 
@@ -72,3 +65,55 @@ with(five_min_steps,plot(minute,ave.steps,type="l",main="Average steps taken eve
 max_interval <- grep(max(five_min_steps$ave.steps),five_min_steps$ave.steps)
 ```
 The 5-minutes interval with the maximum averaged number of steps is the `r max_interval` interval of the day.
+
+
+### Imputing missing values
+
+**Total number of rows with NAs**
+```{r}
+sum(is.na(activity$steps))
+```
+
+**Create data frame with NAs in "steps" filled with mean for each 5-minutes interval**
+Find the dates in which there are NAs
+```{r}
+date_na <- rownames(sum_ac)[grep("^0",sum_ac$total.steps)] %>% as.Date()
+date_na
+```
+
+Fill the 5-minutes intervals of these dates with the mean for each interval
+```{r}
+for(i in 1:length(date_na)){
+    x <- which(activity$date == date_na[i])
+    for(j in 1:length(x)){
+      for(k in 1:nrow(five_min_steps)){
+        if(j == k){
+          activity[x[j],1] <- five_min_steps$ave.steps[k]
+        }
+      }
+    }
+}
+
+summary(activity)
+```
+
+**Histogram of the total number of steps taken each day with the new filled-in data frame**
+```{r}
+sum_ac <- data.frame(total.steps=with(activity, tapply(steps,date,sum,na.rm=TRUE)))
+hist(sum_ac$total.steps, xlab="Number of steps taken daily",main="Histogram of total steps taken per day",col="pink")
+```
+
+Imputing the missing data using the mean of the five minutes intervals, does impact the results, particularly for the frecuency of 0-5000 steps per day with the value below the half of the original data, and the frecuency of 10000-15000 steps  that originally was around 25, being now of around 35.
+
+**Mean and median of steps taken every 5-minutes of each day, using the new filled-in data frame**
+```{r}
+ac <- data.frame(mean=with(activity, tapply(steps,date,mean)), median=with(activity, tapply(steps,date,median)))
+ac
+```
+
+```{r}
+summary(mean_ac)
+summary(ac$mean)
+```
+Imputing the missing data using the mean of the five minutes intervals, did not impact much the results for the mean of total steps taken daily, just the first quantile is slightly higher now and the third quantile, is slightly lower.
+
