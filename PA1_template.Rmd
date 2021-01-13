@@ -1,16 +1,26 @@
----
-title: "PA1_template"
-author: "Cecihes"
-date: "12/1/2021"
-output: html_document
----
+# Assignment
+
+### Loading and preprocessing the data
 
 Unzip and load the file
 
-```{r}
+```{r, cache=TRUE}
 unzip("activity.zip")
 activity <- read.csv("activity.csv")
 colnames(activity)
+```
+
+Check where the missing values are
+```{r, cache=TRUE}
+summary(activity$steps)
+```
+
+```{r, cache=TRUE}
+summary(activity$interval)
+```
+
+```{r, cache=TRUE}
+summary(activity$days)
 ```
 
 Transform the date into date format.
@@ -21,5 +31,14 @@ class(activity$date)
 ```
 
 
+### What is mean total number of steps taken per day?
 
+```{r}
+mean_ac <- data.frame(mean=with(activity, tapply(steps,date,mean,na.rm=TRUE)))
+```
 
+```{r}
+library("dplyr")
+mean_ac <- slice(mean_ac, -grep("NaN",mean_ac$mean))
+mean_ac
+```
